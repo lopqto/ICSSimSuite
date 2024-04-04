@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sync"
 
+	"github.com/lopqto/icssimsuite/pkg/config"
 	"github.com/simonvetter/modbus"
 	log "github.com/sirupsen/logrus"
 )
@@ -51,10 +52,10 @@ type HVACHandler struct {
 	maxFanSpeed uint16
 }
 
-func NewHVACHandler(idleCurrent float32, maxFanSpeed uint16) *HVACHandler {
+func NewHVACHandler(config config.HVAC) *HVACHandler {
 	return &HVACHandler{
-		idleCurrent: idleCurrent,
-		maxFanSpeed: maxFanSpeed,
+		idleCurrent: config.IdleCurrent,
+		maxFanSpeed: config.MaxFanSpeed,
 	}
 }
 

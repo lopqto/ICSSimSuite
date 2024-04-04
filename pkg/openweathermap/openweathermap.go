@@ -3,6 +3,8 @@ package openweathermap
 import (
 	owm "github.com/briandowns/openweathermap"
 	log "github.com/sirupsen/logrus"
+
+	config "github.com/lopqto/icssimsuite/pkg/config"
 )
 
 type Weather struct {
@@ -13,10 +15,10 @@ type Weather struct {
 	city   string
 }
 
-func NewWeather(apiKey string, city string) *Weather {
+func NewWeather(config config.OpenWeatherMap) *Weather {
 	return &Weather{
-		apiKey: apiKey,
-		city:   city,
+		apiKey: config.ApiKey,
+		city:   config.City,
 	}
 }
 
