@@ -12,3 +12,6 @@ idle_timeout = 30 # Seconds
     max_fan_speed = 500 # RPM
     idle_current = 0.1 # Amps - Current drawn by the system when when fan is shut off
 
+[pulsecounter]
+    enabled = true
+

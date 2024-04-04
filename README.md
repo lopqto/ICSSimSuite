@@ -41,3 +41,13 @@ Example configuration file can be found here: [config.toml](config.toml.example)
 | 110 | Power | R | float32 | 0x04 (Input Register) |
 | 200 | Uptime | R | uint32 | 0x04 (Input Register) |
 
+### Pulse Counter (Unit ID: 2)
+
+| Address | Description | Read/Write | Type | Function Code |
+| --- | --- | --- | --- | --- |
+| 0 | Pulse 1 State | R/W | bool | 0x01 (Coil) |
+| 1 | Pulse 2 State | R/W | bool | 0x01 (Coil) |
+| 2 | Pulse 3 State | R/W | bool | 0x01 (Coil) |
+| 100 | Pulse 1 Count | R | uint32 | 0x04 (Input Register) | 
+| 102 | Pulse 2 Count | R | uint32 | 0x04 (Input Register) |
+| 104 | Pulse 3 Count | R | uint32 | 0x04 (Input Register) |

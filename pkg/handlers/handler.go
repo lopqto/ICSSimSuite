@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	hvacUnitId = 1
+	HVACUnitId = 1
+    PulseCounterUnitId = 2
 )
 
 type Handler struct {
@@ -18,24 +19,32 @@ type Handler struct {
 	weather *weather.Weather
 
 	hvacHandler *HVACHandler
+    pulseCounterHandler *PulseCounterHandler
 }
 
 func NewHandler(config *config.Config) *Handler {
 	weather := weather.NewWeather(config.OpenWeatherMap)
 
 	hvacHandler := NewHVACHandler(config.HVAC)
+    pulseCounterHandler := NewPulseCounterHandler(config.PulseCounter)
 
 	return &Handler{
 		config:      config,
 		weather:     weather,
 		hvacHandler: hvacHandler,
+        pulseCounterHandler: pulseCounterHandler,
 	}
 }
 
 func (h *Handler) Init() error {
 	if h.config.HVAC.Enabled {
+        log.Infof("Booting HVAC")
 		h.hvacHandler.Init()
 	}
+    if h.config.PulseCounter.Enabled {
+        log.Infof("Booting Pulse Counter")
+        h.pulseCounterHandler.Init()
+    }
 	return nil
 }
 
@@ -59,15 +68,23 @@ func (h *Handler) Ticker() {
 					}
 				}
 			}
+
+            if h.config.PulseCounter.Enabled {
+                h.pulseCounterHandler.Update()
+            }
+
 		}
 	}
 }
 
 // Coil handler method.
 func (h *Handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) {
-	if req.UnitId == hvacUnitId && h.config.HVAC.Enabled {
+	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleCoils(req)
 	}
+    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+        return h.pulseCounterHandler.HandleCoils(req)
+    }
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)
@@ -77,17 +94,27 @@ func (h *Handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) 
 
 // Discrete input handler method.
 func (h *Handler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res []bool, err error) {
-	err = modbus.ErrIllegalFunction
-	log.Warn("Illegal function: DiscreteInputs")
+    if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
+        return h.hvacHandler.HandleDiscreteInputs(req)
+    }
+    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+        return h.pulseCounterHandler.HandleDiscreteInputs(req)
+    }
+
+    err = modbus.ErrIllegalFunction
+    log.Warnf("Illegal UnitId: %v", req.UnitId)
 	return
 }
 
 // Holding register handler method.
 // operation (either read or write) received by the server.
 func (h *Handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error) {
-	if req.UnitId == hvacUnitId && h.config.HVAC.Enabled {
+	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleHoldingRegisters(req)
 	}
+    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+        return h.pulseCounterHandler.HandleHoldingRegisters(req)
+    }
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)
@@ -99,9 +126,12 @@ func (h *Handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 // operation is received by the server.
 // Note that input registers are always read-only as per the modbus spec.
 func (h *Handler) HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error) {
-	if req.UnitId == hvacUnitId && h.config.HVAC.Enabled {
+	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleInputRegisters(req)
 	}
+    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+        return h.pulseCounterHandler.HandleInputRegisters(req)
+    }
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)

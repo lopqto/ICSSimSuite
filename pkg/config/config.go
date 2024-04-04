@@ -16,6 +16,10 @@ type HVAC struct {
 	MaxFanSpeed uint16  `toml:"max_fan_speed"`
 }
 
+type PulseCounter struct {
+    Enabled bool `toml:"enabled"`
+}
+
 type Config struct {
 	Host           string `toml:"host"`
 	Port           uint16 `toml:"port"`
@@ -23,6 +27,7 @@ type Config struct {
 	IdleTimeout    uint   `toml:"idle_timeout"`
 	OpenWeatherMap OpenWeatherMap
 	HVAC           HVAC
+    PulseCounter   PulseCounter
 }
 
 func (c *Config) LoadConfig(path string) *Config {
