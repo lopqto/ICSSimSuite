@@ -6,8 +6,7 @@ import (
 	"time"
 
 	config "github.com/lopqto/icssimsuite/pkg/config"
-	hvac "github.com/lopqto/icssimsuite/pkg/hvac"
-	weather "github.com/lopqto/icssimsuite/pkg/openweathermap"
+	handler "github.com/lopqto/icssimsuite/pkg/handlers"
 
 	"github.com/simonvetter/modbus"
 	log "github.com/sirupsen/logrus"
@@ -26,18 +25,16 @@ func main() {
 
 	var server *modbus.ModbusServer
 	var err error
-	var eh *hvac.HVACHandler
-	var ticker *time.Ticker
+	var gh *handler.Handler
 
 	// create the config object
 	c := config.Config{}
 	c.LoadConfig(configFile)
 	log.Debugf("Config: %v", c)
 
-	weather := weather.NewWeather(c.OpenWeatherMap.ApiKey, c.OpenWeatherMap.City)
-
 	// create the handler object
-	eh = hvac.NewHVACHandler(c.HVAC.IdleCurrent, c.HVAC.MaxFanSpeed)
+	gh = handler.NewHandler(&c)
+
 	// create the server object
 	server, err = modbus.NewServer(&modbus.ServerConfiguration{
 		URL: fmt.Sprintf("tcp://%s:%d", c.Host, c.Port),
@@ -45,7 +42,7 @@ func main() {
 		Timeout: time.Duration(c.IdleTimeout) * time.Second,
 		// accept 5 concurrent connections max.
 		MaxClients: c.MaxClients,
-	}, eh)
+	}, gh)
 	if err != nil {
 		fmt.Printf("failed to create server: %v\n", err)
 		os.Exit(1)
@@ -60,28 +57,11 @@ func main() {
 	}
 	defer server.Stop()
 
-	eh.Init()
+	gh.Init()
 
-	// inside ticker loop, update the handler every second
-	// set the temperature and humidity from the weather object every 120 seconds
-	ticker = time.NewTicker(1 * time.Second)
-	for {
-		select {
-		case t := <-ticker.C:
-			eh.Update()
-			if t.Second()%120 == 0 {
-				currentWeather, err := weather.GetCurrentWeather()
-				if err != nil {
-					fmt.Printf("failed to get current weather: %v\n", err)
-					os.Exit(1)
-				}
-				eh.SetTemperature(currentWeather.Temperature)
-				eh.SetHumidity(currentWeather.Humidity)
-			}
-		}
-	}
+	// Start the main ticker
+	gh.Ticker()
 
-	// never reached
-
+	// never reach this point
 	return
 }
