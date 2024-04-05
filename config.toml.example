@@ -3,6 +3,8 @@ port = 5502
 max_clients = 5 # Maximum number of clients that can connect to the server
 idle_timeout = 30 # Seconds
 
+log_level = "debug" # trace, debug, info, warn, error, fatal, panic
+
 [openweathermap]
     apikey = "<API_KEY>"
     city = "New York"

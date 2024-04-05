@@ -21,20 +21,20 @@ func main() {
 
 	configFile := os.Args[1]
 
-	log.SetLevel(log.DebugLevel)
-
 	var server *modbus.ModbusServer
 	var err error
 	var gh *handler.Handler
 
 	// create the config object
 	c := config.Config{}
-    _, err = c.LoadConfig(configFile)
-    if err != nil {
-        log.Errorf("Error: %v", err)
-        os.Exit(1)
-    }
+	_, err = c.LoadConfig(configFile)
+	if err != nil {
+		log.Errorf("Error: %v", err)
+		os.Exit(1)
+	}
 
+	// set the log level
+	log.SetLevel(c.MapLogLevel(c.LogLevel))
 	log.Debugf("Config: %v", c)
 
 	// create the handler object
@@ -42,10 +42,8 @@ func main() {
 
 	// create the server object
 	server, err = modbus.NewServer(&modbus.ServerConfiguration{
-		URL: fmt.Sprintf("tcp://%s:%d", c.Host, c.Port),
-		// close idle connections after 30s of inactivity
-		Timeout: time.Duration(c.IdleTimeout) * time.Second,
-		// accept 5 concurrent connections max.
+		URL:        fmt.Sprintf("tcp://%s:%d", c.Host, c.Port),
+		Timeout:    time.Duration(c.IdleTimeout) * time.Second,
 		MaxClients: c.MaxClients,
 	}, gh)
 	if err != nil {

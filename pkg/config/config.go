@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
+	log "github.com/sirupsen/logrus"
 )
 
 type OpenWeatherMap struct {
@@ -16,17 +17,41 @@ type HVAC struct {
 }
 
 type PulseCounter struct {
-    Enabled bool `toml:"enabled"`
+	Enabled bool `toml:"enabled"`
 }
 
 type Config struct {
-	Host           string `toml:"host"`
-	Port           uint16 `toml:"port"`
-	MaxClients     uint   `toml:"max_clients"`
-	IdleTimeout    uint   `toml:"idle_timeout"`
+	Host        string `toml:"host"`
+	Port        uint16 `toml:"port"`
+	MaxClients  uint   `toml:"max_clients"`
+	IdleTimeout uint   `toml:"idle_timeout"`
+
+	LogLevel string `toml:"log_level"`
+
 	OpenWeatherMap OpenWeatherMap
 	HVAC           HVAC
-    PulseCounter   PulseCounter
+	PulseCounter   PulseCounter
+}
+
+func (c *Config) MapLogLevel(level string) log.Level {
+	switch level {
+	case "trace":
+		return log.TraceLevel
+	case "debug":
+		return log.DebugLevel
+	case "info":
+		return log.InfoLevel
+	case "warn":
+		return log.WarnLevel
+	case "error":
+		return log.ErrorLevel
+	case "fatal":
+		return log.FatalLevel
+	case "panic":
+		return log.PanicLevel
+	default:
+		return log.InfoLevel
+	}
 }
 
 func (c *Config) LoadConfig(path string) (*Config, error) {
