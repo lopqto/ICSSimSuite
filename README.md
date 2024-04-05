@@ -12,7 +12,7 @@ ICSSimSuite is an easy-to-use, open-source, and cross-platform simulation suite 
 ## Installation
 
 ``` bash
-go install github.com/lopqto/ICSSimSuite@latest
+go install github.com/lopqto/icssimsuite@latest
 ```
 
 ## Usage
@@ -51,3 +51,10 @@ Example configuration file can be found here: [config.toml](config.toml.example)
 | 100 | Pulse 1 Count | R | uint32 | 0x04 (Input Register) | 
 | 102 | Pulse 2 Count | R | uint32 | 0x04 (Input Register) |
 | 104 | Pulse 3 Count | R | uint32 | 0x04 (Input Register) |
+
+## Planned Devices 
+- [ ] Water Pump
+- [ ] Battery
+- [ ] Solar Panel
+- [ ] Wind Turbine
+
