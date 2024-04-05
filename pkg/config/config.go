@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
-	log "github.com/sirupsen/logrus"
 )
 
 type OpenWeatherMap struct {
@@ -30,10 +29,9 @@ type Config struct {
     PulseCounter   PulseCounter
 }
 
-func (c *Config) LoadConfig(path string) *Config {
+func (c *Config) LoadConfig(path string) (*Config, error) {
 	if _, err := toml.DecodeFile(path, &c); err != nil {
-		log.Errorf("Error: %v", err)
-		return nil
+		return nil, err
 	}
-	return c
+	return c, nil
 }

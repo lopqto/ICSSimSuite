@@ -29,7 +29,12 @@ func main() {
 
 	// create the config object
 	c := config.Config{}
-	c.LoadConfig(configFile)
+    _, err = c.LoadConfig(configFile)
+    if err != nil {
+        log.Errorf("Error: %v", err)
+        os.Exit(1)
+    }
+
 	log.Debugf("Config: %v", c)
 
 	// create the handler object
