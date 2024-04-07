@@ -11,9 +11,10 @@ type OpenWeatherMap struct {
 }
 
 type HVAC struct {
-	Enabled     bool    `toml:"enabled"`
-	IdleCurrent float32 `toml:"idle_current"`
-	MaxFanSpeed uint16  `toml:"max_fan_speed"`
+	Enabled        bool    `toml:"enabled"`
+	IdleCurrent    float32 `toml:"idle_current"`
+	MaxFanSpeed    uint16  `toml:"max_fan_speed"`
+	RoomTempOffset float32 `toml:"room_temp_offset"`
 }
 
 type PulseCounter struct {

@@ -48,14 +48,16 @@ type HVACHandler struct {
 	current         float32
 	power           float32
 
-	idleCurrent float32
-	maxFanSpeed uint16
+	idleCurrent    float32
+	maxFanSpeed    uint16
+	roomTempOffset float32
 }
 
 func NewHVACHandler(config config.HVAC) *HVACHandler {
 	return &HVACHandler{
-		idleCurrent: config.IdleCurrent,
-		maxFanSpeed: config.MaxFanSpeed,
+		idleCurrent:    config.IdleCurrent,
+		maxFanSpeed:    config.MaxFanSpeed,
+		roomTempOffset: config.RoomTempOffset,
 	}
 }
 
@@ -77,7 +79,7 @@ func (h *HVACHandler) Init() error {
 	h.uptime = 0
 	h.temperature = 25
 	h.humidity = 50
-	h.roomTemperature = h.temperature
+	h.roomTemperature = h.temperature + h.roomTempOffset
 	h.fanSpeed = 400
 	h.voltage = 220
 	h.current = h.idleCurrent
@@ -110,7 +112,7 @@ func (h *HVACHandler) Update() error {
 	log.Debugf("Fan Speed: %v", h.fanSpeed)
 
 	// update the room temperature based on the fan speed and the outside temperature
-	targetTemp := h.temperature - (float32(h.fanSpeed) * 0.02)
+	targetTemp := h.temperature - (float32(h.fanSpeed) * 0.02) + h.roomTempOffset
 	log.Debugf("Outside Temp: %v", h.temperature)
 	log.Debugf("Target Temp: %v", targetTemp)
 	// Room tempretature will slowly adjust to the target temperature based on a logaritmic function
