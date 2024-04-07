@@ -58,13 +58,16 @@ func (h *PulseCounterHandler) Update() error {
 	// Pulse 1 goes up by a random number between 0 and 10
 	// Pulse 2 goes up by a random number between 40 and 70
 	// Pulse 3 goes up by a random number between 100 and 150
-	if h.coils[Pulse1StateReg] {
+	chance_to_increment := 0.3 // Default to 30% chance
+
+	// If the coils are set true and the random number is less than the chance to increment, increment the pulse
+	if h.coils[Pulse1StateReg] && rand.Float64() < chance_to_increment {
 		h.pulse1 += uint32(rand.Intn(10))
 	}
-	if h.coils[Pulse2StateReg] {
+	if h.coils[Pulse2StateReg] && rand.Float64() < chance_to_increment {
 		h.pulse2 += uint32(rand.Intn(30) + 40)
 	}
-	if h.coils[Pulse3StateReg] {
+	if h.coils[Pulse3StateReg] && rand.Float64() < chance_to_increment {
 		h.pulse3 += uint32(rand.Intn(50) + 100)
 	}
 
@@ -120,15 +123,15 @@ func (h *PulseCounterHandler) HandleInputRegisters(req *modbus.InputRegistersReq
 		case Pulse1Reg + 1:
 			res = append(res, uint16(h.pulse1&0xffff))
 
-        case Pulse2Reg:
-            res = append(res, uint16((h.pulse2>>16)&0xffff))
-        case Pulse2Reg + 1:
-            res = append(res, uint16(h.pulse2&0xffff))
+		case Pulse2Reg:
+			res = append(res, uint16((h.pulse2>>16)&0xffff))
+		case Pulse2Reg + 1:
+			res = append(res, uint16(h.pulse2&0xffff))
 
-        case Pulse3Reg:
-            res = append(res, uint16((h.pulse3>>16)&0xffff))
-        case Pulse3Reg + 1:
-            res = append(res, uint16(h.pulse3&0xffff))
+		case Pulse3Reg:
+			res = append(res, uint16((h.pulse3>>16)&0xffff))
+		case Pulse3Reg + 1:
+			res = append(res, uint16(h.pulse3&0xffff))
 
 		default:
 			log.Warnf("Illegal data address: %v", regAddr)
