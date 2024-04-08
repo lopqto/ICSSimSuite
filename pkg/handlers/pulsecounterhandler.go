@@ -92,7 +92,10 @@ func (h *PulseCounterHandler) HandleCoils(req *modbus.CoilsRequest) (res []bool,
 	defer h.Lock.Unlock()
 
 	for i := 0; i < int(req.Quantity); i++ {
-		h.coils[int(req.Addr)+i] = req.Args[i]
+		if i < len(req.Args) {
+			// only update the coils if the value is provided
+			h.coils[int(req.Addr)+i] = req.Args[i]
+		}
 		res = append(res, h.coils[int(req.Addr)+i])
 	}
 

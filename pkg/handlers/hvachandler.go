@@ -149,7 +149,9 @@ func (h *HVACHandler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err err
 	defer h.Lock.Unlock()
 
 	for i := 0; i < int(req.Quantity); i++ {
-		h.coils[int(req.Addr)+i] = req.Args[i]
+		if i < len(req.Args) {
+			h.coils[int(req.Addr)+i] = req.Args[i]
+		}
 		res = append(res, h.coils[int(req.Addr)+i])
 	}
 
