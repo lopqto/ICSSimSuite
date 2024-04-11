@@ -18,8 +18,18 @@ type HVAC struct {
 }
 
 type PulseCounter struct {
-	Enabled bool `toml:"enabled"`
-    ChanceToIncrement float32 `toml:"chance_to_increment"`
+	Enabled           bool    `toml:"enabled"`
+	ChanceToIncrement float32 `toml:"chance_to_increment"`
+}
+
+type WaterLevel struct {
+	Enabled            bool   `toml:"enabled"`
+	MaxTankCapacity    uint16 `toml:"max_tank_capacity"`
+	MaxWaterLevel      uint16 `toml:"max_water_level"`
+	MinWaterLevel      uint16 `toml:"min_water_level"`
+	MaxWaterLevelAlarm uint16 `toml:"max_water_level_alarm"`
+	DrainRate          uint16 `toml:"drain_rate"`
+	FillRate           uint16 `toml:"fill_rate"`
 }
 
 type Config struct {
@@ -33,6 +43,7 @@ type Config struct {
 	OpenWeatherMap OpenWeatherMap
 	HVAC           HVAC
 	PulseCounter   PulseCounter
+	WaterLevel     WaterLevel
 }
 
 func (c *Config) MapLogLevel(level string) log.Level {

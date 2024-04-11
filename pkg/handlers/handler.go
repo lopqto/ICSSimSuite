@@ -10,41 +10,52 @@ import (
 )
 
 const (
-	HVACUnitId = 1
-    PulseCounterUnitId = 2
+	HVACUnitId         = 1
+	PulseCounterUnitId = 2
+	WaterLevelUnitId   = 3
 )
 
 type Handler struct {
 	config  *config.Config
 	weather *weather.Weather
 
-	hvacHandler *HVACHandler
-    pulseCounterHandler *PulseCounterHandler
+	hvacHandler         *HVACHandler
+	pulseCounterHandler *PulseCounterHandler
+	waterLevelHandler   *WaterLevelHandler
 }
 
 func NewHandler(config *config.Config) *Handler {
 	weather := weather.NewWeather(config.OpenWeatherMap)
 
 	hvacHandler := NewHVACHandler(config.HVAC)
-    pulseCounterHandler := NewPulseCounterHandler(config.PulseCounter)
+	pulseCounterHandler := NewPulseCounterHandler(config.PulseCounter)
+	waterLevelHandler := NewWaterLevelHandler(config.WaterLevel)
 
 	return &Handler{
-		config:      config,
-		weather:     weather,
-		hvacHandler: hvacHandler,
-        pulseCounterHandler: pulseCounterHandler,
+		config:              config,
+		weather:             weather,
+		hvacHandler:         hvacHandler,
+		pulseCounterHandler: pulseCounterHandler,
+		waterLevelHandler:   waterLevelHandler,
 	}
 }
 
 func (h *Handler) Init() error {
 	if h.config.HVAC.Enabled {
-        log.Infof("Booting HVAC")
+		log.Infof("Booting HVAC")
 		h.hvacHandler.Init()
 	}
-    if h.config.PulseCounter.Enabled {
-        log.Infof("Booting Pulse Counter")
-        h.pulseCounterHandler.Init()
-    }
+
+	if h.config.PulseCounter.Enabled {
+		log.Infof("Booting Pulse Counter")
+		h.pulseCounterHandler.Init()
+	}
+
+	if h.config.WaterLevel.Enabled {
+		log.Infof("Booting Water Level")
+		h.waterLevelHandler.Init()
+	}
+
 	return nil
 }
 
@@ -69,10 +80,13 @@ func (h *Handler) Ticker() {
 				}
 			}
 
-            if h.config.PulseCounter.Enabled {
-                h.pulseCounterHandler.Update()
-            }
+			if h.config.PulseCounter.Enabled {
+				h.pulseCounterHandler.Update()
+			}
 
+			if h.config.WaterLevel.Enabled {
+				h.waterLevelHandler.Update()
+			}
 		}
 	}
 }
@@ -82,9 +96,14 @@ func (h *Handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) 
 	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleCoils(req)
 	}
-    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
-        return h.pulseCounterHandler.HandleCoils(req)
-    }
+
+	if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+		return h.pulseCounterHandler.HandleCoils(req)
+	}
+
+	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
+		return h.waterLevelHandler.HandleCoils(req)
+	}
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)
@@ -94,15 +113,20 @@ func (h *Handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) 
 
 // Discrete input handler method.
 func (h *Handler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res []bool, err error) {
-    if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
-        return h.hvacHandler.HandleDiscreteInputs(req)
-    }
-    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
-        return h.pulseCounterHandler.HandleDiscreteInputs(req)
-    }
+	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
+		return h.hvacHandler.HandleDiscreteInputs(req)
+	}
 
-    err = modbus.ErrIllegalFunction
-    log.Warnf("Illegal UnitId: %v", req.UnitId)
+	if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+		return h.pulseCounterHandler.HandleDiscreteInputs(req)
+	}
+
+	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
+		return h.waterLevelHandler.HandleDiscreteInputs(req)
+	}
+
+	err = modbus.ErrIllegalFunction
+	log.Warnf("Illegal UnitId: %v", req.UnitId)
 	return
 }
 
@@ -112,9 +136,14 @@ func (h *Handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleHoldingRegisters(req)
 	}
-    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
-        return h.pulseCounterHandler.HandleHoldingRegisters(req)
-    }
+
+	if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+		return h.pulseCounterHandler.HandleHoldingRegisters(req)
+	}
+
+	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
+		return h.waterLevelHandler.HandleHoldingRegisters(req)
+	}
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)
@@ -129,9 +158,14 @@ func (h *Handler) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 	if req.UnitId == HVACUnitId && h.config.HVAC.Enabled {
 		return h.hvacHandler.HandleInputRegisters(req)
 	}
-    if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
-        return h.pulseCounterHandler.HandleInputRegisters(req)
-    }
+
+	if req.UnitId == PulseCounterUnitId && h.config.PulseCounter.Enabled {
+		return h.pulseCounterHandler.HandleInputRegisters(req)
+	}
+
+	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
+		return h.waterLevelHandler.HandleInputRegisters(req)
+	}
 
 	err = modbus.ErrIllegalFunction
 	log.Warnf("Illegal UnitId: %v", req.UnitId)

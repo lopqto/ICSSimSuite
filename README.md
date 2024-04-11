@@ -52,8 +52,17 @@ Example configuration file can be found here: [config.toml](config.toml.example)
 | 102 | Pulse 2 Count | R | uint32 | 0x04 (Input Register) |
 | 104 | Pulse 3 Count | R | uint32 | 0x04 (Input Register) |
 
+### Water Tank (Unit ID: 3)
+
+| Address | Description | Read/Write | Type | Function Code |
+| --- | --- | --- | --- | --- |
+| 0 | Mode | R/W | bool | 0x01 (Coil) |
+| 1 | Valve State | R/W | bool | 0x01 (Coil) |
+| 2 | Pump State | R/W | bool | 0x01 (Coil) |
+| 100 | Water Level | R | uint16 | 0x04 (Input Register) |
+
 ## Planned Devices 
-- [ ] Water Pump
+- [x] Water Tank
 - [ ] Battery
 - [ ] Solar Panel
 - [ ] Wind Turbine
