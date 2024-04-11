@@ -19,6 +19,7 @@ type HVAC struct {
 
 type PulseCounter struct {
 	Enabled bool `toml:"enabled"`
+    ChanceToIncrement float32 `toml:"chance_to_increment"`
 }
 
 type Config struct {

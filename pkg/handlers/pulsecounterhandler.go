@@ -29,10 +29,14 @@ type PulseCounterHandler struct {
 	pulse1 uint32
 	pulse2 uint32
 	pulse3 uint32
+
+	chanceToIncrement float32
 }
 
 func NewPulseCounterHandler(config config.PulseCounter) *PulseCounterHandler {
-	return &PulseCounterHandler{}
+	return &PulseCounterHandler{
+		chanceToIncrement: config.ChanceToIncrement,
+	}
 }
 
 func (h *PulseCounterHandler) Init() error {
@@ -58,16 +62,15 @@ func (h *PulseCounterHandler) Update() error {
 	// Pulse 1 goes up by a random number between 0 and 10
 	// Pulse 2 goes up by a random number between 40 and 70
 	// Pulse 3 goes up by a random number between 100 and 150
-	chance_to_increment := 0.3 // Default to 30% chance
 
 	// If the coils are set true and the random number is less than the chance to increment, increment the pulse
-	if h.coils[Pulse1StateReg] && rand.Float64() < chance_to_increment {
+	if h.coils[Pulse1StateReg] && rand.Float32() < h.chanceToIncrement {
 		h.pulse1 += uint32(rand.Intn(10))
 	}
-	if h.coils[Pulse2StateReg] && rand.Float64() < chance_to_increment {
+	if h.coils[Pulse2StateReg] && rand.Float32() < h.chanceToIncrement {
 		h.pulse2 += uint32(rand.Intn(30) + 40)
 	}
-	if h.coils[Pulse3StateReg] && rand.Float64() < chance_to_increment {
+	if h.coils[Pulse3StateReg] && rand.Float32() < h.chanceToIncrement {
 		h.pulse3 += uint32(rand.Intn(50) + 100)
 	}
 
