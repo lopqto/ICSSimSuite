@@ -25,7 +25,7 @@ const (
 	waterLevelReg = 100
 )
 
-type WaterLevelHandler struct {
+type WaterTankHandler struct {
 	Lock sync.RWMutex
 
 	coils [10]bool
@@ -39,8 +39,8 @@ type WaterLevelHandler struct {
 	fillRate           uint16
 }
 
-func NewWaterLevelHandler(config config.WaterLevel) *WaterLevelHandler {
-	return &WaterLevelHandler{
+func NewWaterTankHandler(config config.WaterTank) *WaterTankHandler {
+	return &WaterTankHandler{
 		maxTankCapacity:    config.MaxTankCapacity,
 		maxWaterLevel:      config.MaxWaterLevel,
 		minWaterLevel:      config.MinWaterLevel,
@@ -50,7 +50,7 @@ func NewWaterLevelHandler(config config.WaterLevel) *WaterLevelHandler {
 	}
 }
 
-func (h *WaterLevelHandler) Init() error {
+func (h *WaterTankHandler) Init() error {
 
 	h.coils[selectedModeReg] = true // false for manual mode, true for automatic mode
 	h.coils[valveStateReg] = false  // false for closed, true for open - drains the tank
@@ -59,7 +59,7 @@ func (h *WaterLevelHandler) Init() error {
 	return nil
 }
 
-func (h *WaterLevelHandler) Update() error {
+func (h *WaterTankHandler) Update() error {
 	h.Lock.Lock()
 	defer h.Lock.Unlock()
 
@@ -103,7 +103,7 @@ func (h *WaterLevelHandler) Update() error {
 	return nil
 }
 
-func (h *WaterLevelHandler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) {
+func (h *WaterTankHandler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) {
 	if int(req.Addr)+int(req.Quantity) > len(h.coils) {
 		err = modbus.ErrIllegalDataAddress
 		log.Warnf("Illegal data address: %v", req.Addr)
@@ -127,19 +127,19 @@ func (h *WaterLevelHandler) HandleCoils(req *modbus.CoilsRequest) (res []bool, e
 	return res, nil
 }
 
-func (h *WaterLevelHandler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res []bool, err error) {
+func (h *WaterTankHandler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res []bool, err error) {
 	err = modbus.ErrIllegalFunction
 	log.Warn("Illegal function: DiscreteInputs")
 	return res, err
 }
 
-func (h *WaterLevelHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error) {
+func (h *WaterTankHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error) {
 	err = modbus.ErrIllegalFunction
 	log.Warn("Illegal function: HoldingRegisters")
 	return res, err
 }
 
-func (h *WaterLevelHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error) {
+func (h *WaterTankHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error) {
 
 	for regAddr := req.Addr; regAddr < req.Addr+req.Quantity; regAddr++ {
 		switch regAddr {

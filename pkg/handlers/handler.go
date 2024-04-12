@@ -12,7 +12,7 @@ import (
 const (
 	HVACUnitId         = 1
 	PulseCounterUnitId = 2
-	WaterLevelUnitId   = 3
+	WaterTankUnitId    = 3
 )
 
 type Handler struct {
@@ -21,7 +21,7 @@ type Handler struct {
 
 	hvacHandler         *HVACHandler
 	pulseCounterHandler *PulseCounterHandler
-	waterLevelHandler   *WaterLevelHandler
+	waterTankHandler    *WaterTankHandler
 }
 
 func NewHandler(config *config.Config) *Handler {
@@ -29,14 +29,14 @@ func NewHandler(config *config.Config) *Handler {
 
 	hvacHandler := NewHVACHandler(config.HVAC)
 	pulseCounterHandler := NewPulseCounterHandler(config.PulseCounter)
-	waterLevelHandler := NewWaterLevelHandler(config.WaterLevel)
+	waterTankHandler := NewWaterTankHandler(config.WaterTank)
 
 	return &Handler{
 		config:              config,
 		weather:             weather,
 		hvacHandler:         hvacHandler,
 		pulseCounterHandler: pulseCounterHandler,
-		waterLevelHandler:   waterLevelHandler,
+		waterTankHandler:    waterTankHandler,
 	}
 }
 
@@ -51,9 +51,9 @@ func (h *Handler) Init() error {
 		h.pulseCounterHandler.Init()
 	}
 
-	if h.config.WaterLevel.Enabled {
-		log.Infof("Booting Water Level")
-		h.waterLevelHandler.Init()
+	if h.config.WaterTank.Enabled {
+		log.Infof("Booting Water Tank")
+		h.waterTankHandler.Init()
 	}
 
 	return nil
@@ -84,8 +84,8 @@ func (h *Handler) Ticker() {
 				h.pulseCounterHandler.Update()
 			}
 
-			if h.config.WaterLevel.Enabled {
-				h.waterLevelHandler.Update()
+			if h.config.WaterTank.Enabled {
+				h.waterTankHandler.Update()
 			}
 		}
 	}
@@ -101,8 +101,8 @@ func (h *Handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) 
 		return h.pulseCounterHandler.HandleCoils(req)
 	}
 
-	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
-		return h.waterLevelHandler.HandleCoils(req)
+	if req.UnitId == WaterTankUnitId && h.config.WaterTank.Enabled {
+		return h.waterTankHandler.HandleCoils(req)
 	}
 
 	err = modbus.ErrIllegalFunction
@@ -121,8 +121,8 @@ func (h *Handler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res [
 		return h.pulseCounterHandler.HandleDiscreteInputs(req)
 	}
 
-	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
-		return h.waterLevelHandler.HandleDiscreteInputs(req)
+	if req.UnitId == WaterTankUnitId && h.config.WaterTank.Enabled {
+		return h.waterTankHandler.HandleDiscreteInputs(req)
 	}
 
 	err = modbus.ErrIllegalFunction
@@ -141,8 +141,8 @@ func (h *Handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 		return h.pulseCounterHandler.HandleHoldingRegisters(req)
 	}
 
-	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
-		return h.waterLevelHandler.HandleHoldingRegisters(req)
+	if req.UnitId == WaterTankUnitId && h.config.WaterTank.Enabled {
+		return h.waterTankHandler.HandleHoldingRegisters(req)
 	}
 
 	err = modbus.ErrIllegalFunction
@@ -163,8 +163,8 @@ func (h *Handler) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 		return h.pulseCounterHandler.HandleInputRegisters(req)
 	}
 
-	if req.UnitId == WaterLevelUnitId && h.config.WaterLevel.Enabled {
-		return h.waterLevelHandler.HandleInputRegisters(req)
+	if req.UnitId == WaterTankUnitId && h.config.WaterTank.Enabled {
+		return h.waterTankHandler.HandleInputRegisters(req)
 	}
 
 	err = modbus.ErrIllegalFunction

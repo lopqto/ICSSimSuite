@@ -22,7 +22,7 @@ type PulseCounter struct {
 	ChanceToIncrement float32 `toml:"chance_to_increment"`
 }
 
-type WaterLevel struct {
+type WaterTank struct {
 	Enabled            bool   `toml:"enabled"`
 	MaxTankCapacity    uint16 `toml:"max_tank_capacity"`
 	MaxWaterLevel      uint16 `toml:"max_water_level"`
@@ -43,7 +43,7 @@ type Config struct {
 	OpenWeatherMap OpenWeatherMap
 	HVAC           HVAC
 	PulseCounter   PulseCounter
-	WaterLevel     WaterLevel
+	WaterTank      WaterTank
 }
 
 func (c *Config) MapLogLevel(level string) log.Level {
