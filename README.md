@@ -60,6 +60,12 @@ Example configuration file can be found here: [config.toml](config.toml.example)
 | 1 | Valve State | R/W | bool | 0x01 (Coil) |
 | 2 | Pump State | R/W | bool | 0x01 (Coil) |
 | 100 | Water Level | R | uint16 | 0x04 (Input Register) |
+| 101 | Max Tank Capacity | R | uint16 | 0x04 (Input Register) |
+| 102 | Max Water Level | R | uint16 | 0x04 (Input Register) |
+| 103 | Min Water Level | R | uint16 | 0x04 (Input Register) |
+| 104 | Max Water Level Alarm | R | uint16 | 0x04 (Input Register) |
+| 105 | Drain Rate | R | uint16 | 0x04 (Input Register) |
+| 106 | Fill Rate | R | uint16 | 0x04 (Input Register) |
 
 ## Planned Devices 
 - [x] Water Tank

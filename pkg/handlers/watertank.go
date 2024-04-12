@@ -22,7 +22,13 @@ const (
 	pumpStateReg    = 2
 
 	// Input Registers (Read-Only)
-	waterLevelReg = 100
+	waterLevelReg         = 100
+	maxTankCapacityReg    = 101
+	maxWaterLevelReg      = 102
+	minWaterLevelReg      = 103
+	maxWaterLevelAlarmReg = 104
+	drainRateReg          = 105
+	fillRateReg           = 106
 )
 
 type WaterTankHandler struct {
@@ -30,13 +36,14 @@ type WaterTankHandler struct {
 
 	coils [10]bool
 
-	maxTankCapacity    uint16
-	maxWaterLevel      uint16 // Turn off the pump when the water level reaches this value
-	minWaterLevel      uint16 // Turn on the pump when the water level reaches this value
-	maxWaterLevelAlarm uint16 // Forcefully turn off the pump when the water level reaches this value
-	waterLevel         uint16
-	drainRate          uint16
-	fillRate           uint16
+	maxTankCapacity     uint16
+	maxWaterLevel       uint16 // Turn off the pump when the water level reaches this value
+	minWaterLevel       uint16 // Turn on the pump when the water level reaches this value
+	maxWaterLevelAlarm  uint16 // Forcefully turn off the pump when the water level reaches this value
+	waterLevel          uint16
+	drainRate           uint16
+	calculatedDrainRate uint16
+	fillRate            uint16
 }
 
 func NewWaterTankHandler(config config.WaterTank) *WaterTankHandler {
@@ -90,9 +97,12 @@ func (h *WaterTankHandler) Update() error {
 	// valve state is always maintained by the user
 	log.Debugf("Valve State: %v", h.coils[valveStateReg])
 	if h.coils[valveStateReg] {
-		randomDrainRate := uint16(float64(h.drainRate) * (0.9 + 0.2*rand.Float64()))
-		log.Debugf("Drain Rate: %v", randomDrainRate)
-		h.waterLevel -= randomDrainRate
+		h.calculatedDrainRate = uint16(float64(h.drainRate) * (0.9 + 0.2*rand.Float64()))
+		log.Debugf("Calculated Drain Rate: %v", h.calculatedDrainRate)
+		h.waterLevel -= h.calculatedDrainRate
+	} else {
+		// if the valve is closed, the drain rate is 0
+		h.calculatedDrainRate = 0
 	}
 
 	log.Debugf("Pump State: %v", h.coils[pumpStateReg])
@@ -146,6 +156,24 @@ func (h *WaterTankHandler) HandleInputRegisters(req *modbus.InputRegistersReques
 
 		case waterLevelReg:
 			res = append(res, h.waterLevel)
+
+		case maxTankCapacityReg:
+			res = append(res, h.maxTankCapacity)
+
+		case maxWaterLevelReg:
+			res = append(res, h.maxWaterLevel)
+
+		case minWaterLevelReg:
+			res = append(res, h.minWaterLevel)
+
+		case maxWaterLevelAlarmReg:
+			res = append(res, h.maxWaterLevelAlarm)
+
+		case drainRateReg:
+			res = append(res, h.calculatedDrainRate)
+
+		case fillRateReg:
+			res = append(res, h.fillRate)
 
 		default:
 			log.Warnf("Illegal data address: %v", regAddr)
